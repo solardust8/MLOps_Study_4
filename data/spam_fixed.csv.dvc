@@ -1,0 +1,5 @@
+outs:
+- md5: 54b011a820d22c11739cb171277af2b5
+  size: 531725
+  hash: md5
+  path: spam_fixed.csv
