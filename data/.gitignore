@@ -1,2 +1,5 @@
 /spam.csv
 /spam_fixed.csv
+/spam_fixed_augmented.csv
+/spam_fixed_augmented_train.csv
+/spam_fixed_augmented_val.csv
