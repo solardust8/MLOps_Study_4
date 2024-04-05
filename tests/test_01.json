@@ -1,1 +1,12 @@
-{"WIN ultimate PRIZE !!!!! ONLY TODAY!!!! Folow attached link below": "spam"}
+{
+    "text": [
+        "WIN ultimate PRIZE !!!!! ONLY TODAY!!!! Folow attached link below",
+        "Hello, Hellen. How are you doing? Mom told me u want lasagna for dinner.",
+	"Ok, meet you at the park"
+    ],
+    "label": [
+        "spam",
+	"ham",
+	"ham"
+    ]
+}

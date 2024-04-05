@@ -1,16 +1,13 @@
 import argparse
 import configparser
-from datetime import datetime
-import os
-import json
-import pandas as pd
-import pickle
-from sklearn.preprocessing import StandardScaler
-import shutil
 import sys
-import time
+import os
 import traceback
-import yaml
+
+import json
+import torch
+from transformers import DistilBertForSequenceClassification, DistilBertTokenizer
+
 
 from logger import Logger
 
@@ -19,96 +16,145 @@ SHOW_LOG = True
 
 class Predictor():
 
-    def __init__(self) -> None:
+    def __init__(self,
+                 params: dict) -> None:
+        if params != None:
+            keys = list(params.keys())
+            assert (len(params) == 2 and
+                    'mode' in keys and
+                    'tests' in keys)
+            assert (params['mode'] in ["infere", "train"] and
+                    params['tests'] in ["func", "none"])
+            self.args = params
+        else:
+            self.args = {'mode': 'infere', 'tests': 'none'}
+
         logger = Logger(SHOW_LOG)
         self.config = configparser.ConfigParser()
         self.log = logger.get_logger(__name__)
         self.config.read("config.ini")
-        self.parser = argparse.ArgumentParser(description="Predictor")
-        self.parser.add_argument("-m",
-                                 "--model",
-                                 type=str,
-                                 help="Select model",
-                                 required=True,
-                                 default="LOG_REG",
-                                 const="LOG_REG",
-                                 nargs="?",
-                                 choices=["LOG_REG", "RAND_FOREST", "KNN", "GNB", "SVM", "D_TREE"])
-        self.parser.add_argument("-t",
-                                 "--tests",
-                                 type=str,
-                                 help="Select tests",
-                                 required=True,
-                                 default="smoke",
-                                 const="smoke",
-                                 nargs="?",
-                                 choices=["smoke", "func"])
-        self.X_train = pd.read_csv(
-            self.config["SPLIT_DATA"]["X_train"], index_col=0)
-        self.y_train = pd.read_csv(
-            self.config["SPLIT_DATA"]["y_train"], index_col=0)
-        self.X_test = pd.read_csv(
-            self.config["SPLIT_DATA"]["X_test"], index_col=0)
-        self.y_test = pd.read_csv(
-            self.config["SPLIT_DATA"]["y_test"], index_col=0)
-        self.sc = StandardScaler()
-        self.X_train = self.sc.fit_transform(self.X_train)
-        self.X_test = self.sc.transform(self.X_test)
-        self.log.info("Predictor is ready")
+        
+        self.root_dir = self.config['ROOT']['root_dir']
+    
+        self.device = self.config['PARAMETERS']['device']
+        self.seq_max_length = int(self.config['PARAMETERS']['tokenizer_seq_max_length'])
+    
+        assert (isinstance(self.device, str) and
+                self.device in ['cpu', 'cuda:0'])
+        assert (isinstance(self.seq_max_length, int) and
+                self.seq_max_length > 0 and
+                self.seq_max_length <= 512)
 
-    def predict(self) -> bool:
-        args = self.parser.parse_args()
+    
         try:
-            classifier = pickle.load(
-                open(self.config[args.model]["path"], "rb"))
-        except FileNotFoundError:
+            if self.args['mode'] == 'train':
+                self.model = DistilBertForSequenceClassification.from_pretrained(
+                    self.config['PARAMETERS']['base_weights'], num_labels=2, local_files_only=True).to(self.device)
+            else:
+                self.model = DistilBertForSequenceClassification.from_pretrained(
+                    self.config['PARAMETERS']['finetuned_weights'], local_files_only=True).to(self.device)
+        except Exception:
             self.log.error(traceback.format_exc())
             sys.exit(1)
-        if args.tests == "smoke":
+
+        try:
+            self.tokenizer = DistilBertTokenizer.from_pretrained(
+                self.config['PARAMETERS']['tokenizer'], local_files_only=True)
+        except Exception:
+            self.log.error(traceback.format_exc())
+            sys.exit(1)
+
+        self.id2label = ['ham', 'spam']
+        self.log.info("Predictor is ready")
+        
+    def tokenize_inputs(self, prompts: list):
+        try:
+            tokens = self.tokenizer(
+                prompts,
+                max_length=self.seq_max_length,
+                padding='max_length',
+                truncation=True,
+                return_tensors='pt'
+            )
+        except Exception:
+            self.log.error(traceback.format_exc())
+            sys.exit(1)
+        return tokens
+    
+    def model_eval(self):
+        return self.model.eval()
+    
+    def model_train(self):
+        return self.model.train()
+    
+    def get_model_output(self, prompts: list) -> list:
+        tokens = self.tokenize_inputs(prompts)
+        self.model.eval()
+        result = []
+        for i in range(len(prompts)):
+            input_ids, attention_mask = tokens['input_ids'][i].unsqueeze(0).to(self.device), tokens['attention_mask'][i].unsqueeze(0).to(self.device)
             try:
-                score = classifier.score(self.X_test, self.y_test)
-                print(f'{args.model} has {score} score')
+                with torch.no_grad():
+                    outputs = self.model(
+                        input_ids=input_ids,
+                        attention_mask=attention_mask
+                    )
             except Exception:
                 self.log.error(traceback.format_exc())
                 sys.exit(1)
-            self.log.info(
-                f'{self.config[args.model]["path"]} passed smoke tests')
-        elif args.tests == "func":
+            softmaxed = torch.nn.functional.softmax(outputs.logits, dim=-1)
+            res_idx = torch.argmax(softmaxed, dim=-1)
+            result.append({'label': self.id2label[res_idx], 'score': softmaxed.squeeze(0)[res_idx].item()})
+        return result
+          
+
+    def run_tests(self) -> bool:
+        if self.args['tests'] == "func":
             tests_path = os.path.join(os.getcwd(), "tests")
-            exp_path = os.path.join(os.getcwd(), "experiments")
             for test in os.listdir(tests_path):
                 with open(os.path.join(tests_path, test)) as f:
                     try:
                         data = json.load(f)
-                        X = self.sc.transform(
-                            pd.json_normalize(data, record_path=['X']))
-                        y = pd.json_normalize(data, record_path=['y'])
-                        score = classifier.score(X, y)
-                        print(f'{args.model} has {score} score')
+                        result = self.get_model_output(prompts=data["text"])
+                        print(result)
+                        accuracy = 0.
+                        for res, gt in zip(result, data["label"]):
+                            accuracy += int(res['label'] == gt)
+                        print(f'Predictor has {accuracy/len(result)} accuracy score')
                     except Exception:
                         self.log.error(traceback.format_exc())
                         sys.exit(1)
                     self.log.info(
-                        f'{self.config[args.model]["path"]} passed func test {f.name}')
-                    exp_data = {
-                        "model": args.model,
-                        "model params": dict(self.config.items(args.model)),
-                        "tests": args.tests,
-                        "score": str(score),
-                        "X_test path": self.config["SPLIT_DATA"]["x_test"],
-                        "y_test path": self.config["SPLIT_DATA"]["y_test"],
-                    }
-                    date_time = datetime.fromtimestamp(time.time())
-                    str_date_time = date_time.strftime("%Y_%m_%d_%H_%M_%S")
-                    exp_dir = os.path.join(exp_path, f'exp_{test[:6]}_{str_date_time}')
-                    os.mkdir(exp_dir)
-                    with open(os.path.join(exp_dir,"exp_config.yaml"), 'w') as exp_f:
-                        yaml.safe_dump(exp_data, exp_f, sort_keys=False)
-                    shutil.copy(os.path.join(os.getcwd(), "logfile.log"), os.path.join(exp_dir,"exp_logfile.log"))
-                    shutil.copy(self.config[args.model]["path"], os.path.join(exp_dir,f'exp_{args.model}.sav'))
+                        f'Predictor passed func test {f.name}')        
         return True
 
 
 if __name__ == "__main__":
-    predictor = Predictor()
-    predictor.predict()
+    parser = argparse.ArgumentParser(description="Predictor")
+    parser.add_argument("-m",
+                        "--mode",
+                        type=str,
+                        help="Select mode",
+                        required=False,
+                        default="infere",
+                        const="infere",
+                        nargs="?",
+                        choices=["infere", "train"])
+    parser.add_argument("-t",
+                        "--tests",
+                        type=str,
+                        help="Select tests",
+                        required=False,
+                        default="none",
+                        const="none",
+                        nargs="?",
+                        choices=["func", "none"])
+    try:
+        args = parser.parse_args()
+    except Exception:
+        print(traceback.format_exc())
+        sys.exit(1)
+    params = vars(args)
+    predictor = Predictor(params=params)
+    if params['tests'] != None:
+        predictor.run_tests()
