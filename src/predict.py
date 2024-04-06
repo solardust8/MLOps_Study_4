@@ -19,6 +19,7 @@ class Predictor():
     def __init__(self,
                  params: dict) -> None:
         if params != None:
+            assert isinstance(params, dict)
             keys = list(params.keys())
             assert (len(params) == 2 and
                     'mode' in keys and
@@ -49,7 +50,7 @@ class Predictor():
         try:
             if self.args['mode'] == 'train':
                 self.model = DistilBertForSequenceClassification.from_pretrained(
-                    self.config['PARAMETERS']['base_weights'], num_labels=2, local_files_only=True).to(self.device)
+                    self.config['PARAMETERS']['base_weights'], local_files_only=True).to(self.device)
             else:
                 self.model = DistilBertForSequenceClassification.from_pretrained(
                     self.config['PARAMETERS']['finetuned_weights'], local_files_only=True).to(self.device)
@@ -67,7 +68,7 @@ class Predictor():
         self.id2label = ['ham', 'spam']
         self.log.info("Predictor is ready")
         
-    def tokenize_inputs(self, prompts: list):
+    def tokenize_inputs(self, prompts: list[str]):
         try:
             tokens = self.tokenizer(
                 prompts,
@@ -87,7 +88,7 @@ class Predictor():
     def model_train(self):
         return self.model.train()
     
-    def get_model_output(self, prompts: list) -> list:
+    def get_model_output(self, prompts: list[str]) -> list[dict]:
         tokens = self.tokenize_inputs(prompts)
         self.model.eval()
         result = []
