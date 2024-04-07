@@ -33,7 +33,7 @@ class Predictor():
         logger = Logger(SHOW_LOG)
         self.config = configparser.ConfigParser()
         self.log = logger.get_logger(__name__)
-        self.config.read("config.ini")
+        self.config.read("config.ini", encoding="utf-8")
         
         self.root_dir = self.config['ROOT']['root_dir']
     
