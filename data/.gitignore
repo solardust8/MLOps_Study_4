@@ -3,3 +3,5 @@
 /spam_fixed_augmented.csv
 /spam_fixed_augmented_train.csv
 /spam_fixed_augmented_val.csv
+/unit_test_train.csv
+/unit_test_val.csv
