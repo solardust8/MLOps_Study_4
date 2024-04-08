@@ -9,7 +9,7 @@ import torch
 from transformers import DistilBertForSequenceClassification, DistilBertTokenizer
 
 
-from logger import Logger
+from src.logger import Logger
 
 SHOW_LOG = True
 
