@@ -4,6 +4,8 @@ import sys
 import os
 import traceback
 
+sys.path.append(os.path.join(os.getcwd(), 'src'))
+
 from logger import Logger
 SHOW_LOG = True
 

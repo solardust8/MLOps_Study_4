@@ -8,8 +8,9 @@ import json
 import torch
 from transformers import DistilBertForSequenceClassification, DistilBertTokenizer
 
+sys.path.append(os.path.join(os.getcwd(), 'src'))
 
-from src.logger import Logger
+from logger import Logger
 
 SHOW_LOG = True
 
