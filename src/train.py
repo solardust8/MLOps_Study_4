@@ -42,8 +42,8 @@ class Train():
                     'save_path' in keys)
             self.params = params
         else:
-            self.params = {'train': os.path.join(os.getcwd(), self.config['SPLIT_DATA']['unit_test_train']),
-                           'val': os.path.join(os.getcwd(), self.config['SPLIT_DATA']['unit_test_train']),
+            self.params = {'train': os.path.join(os.getcwd(), self.config['DATA']['data_folder'], self.config['DATA']['unit_test_train']),
+                           'val': os.path.join(os.getcwd(), self.config['DATA']['data_folder'], self.config['DATA']['unit_test_train']),
                            'batch_size': 1,
                            'lr': 5e-5,
                            'num_epochs': 1,

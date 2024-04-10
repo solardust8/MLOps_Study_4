@@ -1,5 +1,2 @@
-2024-04-08 00:33:45,745 — train — INFO — class Train instance ready
-2024-04-08 00:33:47,386 — train — INFO — Training epoch 1/1: --Loss: 0.7316 --Mathews Correlation: 0.0000 --F1: 0.3333
-
-2024-04-08 00:33:47,922 — train — INFO — Validation epoch 1/1: --Loss: 0.5413 --Mathews Correlation: 0.0000 --F1: 0.6667
-
+2024-04-10 16:03:07,134 — __main__ — INFO — Predictor is ready
+2024-04-10 16:03:24,032 — __main__ — INFO — Predictor passed func test E:\Work and Science\MASTERS\BigData\MLOps_Study_1\tests\test_01.json

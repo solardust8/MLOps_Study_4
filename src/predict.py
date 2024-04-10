@@ -51,17 +51,20 @@ class Predictor():
         try:
             if self.args['mode'] == 'train':
                 self.model = DistilBertForSequenceClassification.from_pretrained(
-                    self.config['PARAMETERS']['base_weights'], local_files_only=True).to(self.device)
+                    os.path.join(self.config['PARAMETERS']['weights_folder'],self.config['PARAMETERS']['base_weights']), 
+                    local_files_only=True).to(self.device)
             else:
                 self.model = DistilBertForSequenceClassification.from_pretrained(
-                    self.config['PARAMETERS']['finetuned_weights'], local_files_only=True).to(self.device)
+                    os.path.join(self.config['PARAMETERS']['weights_folder'],self.config['PARAMETERS']['finetuned_weights']), 
+                    local_files_only=True).to(self.device)
         except Exception:
             self.log.error(traceback.format_exc())
             sys.exit(1)
 
         try:
             self.tokenizer = DistilBertTokenizer.from_pretrained(
-                self.config['PARAMETERS']['tokenizer'], local_files_only=True)
+                os.path.join(self.config['PARAMETERS']['weights_folder'],self.config['PARAMETERS']['tokenizer']), 
+                local_files_only=True)
         except Exception:
             self.log.error(traceback.format_exc())
             sys.exit(1)
