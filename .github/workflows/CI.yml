@@ -15,6 +15,7 @@ jobs:
         lfs: true
 
     - run: git lfs pull
+    - run: dvc pull
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
