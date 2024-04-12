@@ -12,12 +12,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: iterative/setup-dvc@v1
-    env:
-      GDRIVE_CREDENTIALS_DATA : ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
-
-      run: |
+    
+    - run: |
         pip install -U dvc[gdrive] pydrive2
         dvc pull
+
+      env:
+        GDRIVE_CREDENTIALS_DATA : ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
