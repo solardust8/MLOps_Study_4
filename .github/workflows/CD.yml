@@ -13,14 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-      with:
-        lfs: true
-
+    
     - name: Pull Docker image
       run: docker pull solardust8/mlops_study_1:latest
 
-    - name: Run Docker container
-      run: docker run -d --name mlops_study_1 solardust8/mlops_study_1:latest
+    - name: Run Docker container without server
+      run: docker run -d --name mlops_study_1 solardust8/mlops_study_1:latest tail -f /dev/null
 
     - name: Execute unit test inside container
       run: docker exec mlops_study_1 python3 src/unit_tests/unit_test_train.py
