@@ -14,7 +14,7 @@ jobs:
     - uses: iterative/setup-dvc@v1
     
     - run: |
-        pip install -U dvc[gdrive] pydrive2
+        pip install -U dvc[gdrive] pydrive2 pyopenssl==24.0.0
         dvc pull
 
       env:
