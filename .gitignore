@@ -1,0 +1,3 @@
+weights/SpamHamModel/model.safetensors
+weights/DistilBert_4seqSls_base_cased/model.safetensors
+*.log
