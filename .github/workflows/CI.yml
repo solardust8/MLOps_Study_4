@@ -25,8 +25,8 @@ jobs:
         download-file-name: distilbert.safetensors
         download-to: ./weights/DistilBert_4seqSls_base_cased/
 
-    - run: "mv weights/DistilBert_4seqSls_base_cased/distilbert.safetensors weights/DistilBert_4seqSls_base_cased/model.safetensors"
-    - run: "mv weights/SpamHamModel/spamham.safetensors weights/SpamHamModel/model.safetensors" 
+    - run: mv weights/DistilBert_4seqSls_base_cased/distilbert.safetensors weights/DistilBert_4seqSls_base_cased/model.safetensors
+    - run: mv weights/SpamHamModel/spamham.safetensors weights/SpamHamModel/model.safetensors
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
