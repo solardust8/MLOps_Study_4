@@ -15,15 +15,18 @@ jobs:
       uses: k0staa/download-gdrive-file-action@v1
       with:
         service-account-key-json: ${{ secrets.SERVICE_ACCOUNT_KEY_JSON }}
-        download-file-name: SpamHam_weights/SpamHam/model.safetensors
+        download-file-name: spamham.safetensors
         download-to: ./weights/SpamHamModel/
 
     - name: Download weights Distilbert
       uses: k0staa/download-gdrive-file-action@v1
       with:
         service-account-key-json: ${{ secrets.SERVICE_ACCOUNT_KEY_JSON }}
-        download-file-name: SpamHam_weights/Distilbert/model.safetensors
+        download-file-name: distilbert.safetensors
         download-to: ./weights/DistilBert_4seqSls_base_cased/
+
+    - run: "mv weights/DistilBert_4seqSls_base_cased/distilbert.safetensors weights/DistilBert_4seqSls_base_cased/model.safetensors"
+    - run: "mv weights/SpamHamModel/spamham.safetensors weights/SpamHamModel/model.safetensors" 
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
