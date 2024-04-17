@@ -18,7 +18,7 @@ jobs:
         download-file-name: SpamHam_weights/SpamHam/model.safetensors
         download-to: ./weights/SpamHamModel/
 
-    - name: Download weights SpamHam
+    - name: Download weights Distilbert
       uses: k0staa/download-gdrive-file-action@v1
       with:
         service-account-auth-json: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
