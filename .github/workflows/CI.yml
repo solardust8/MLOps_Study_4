@@ -11,16 +11,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: iterative/setup-dvc@v1
-    
-    - run: |
-        pip install pip --upgrade
-        pip install -U dvc[gdrive] pydrive2
-        pip install pyopenssl --upgrade
-        dvc pull
+    - name: Download weights SpamHam
+      uses: k0staa/download-gdrive-file-action@v1
+      with:
+        service-account-auth-json: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+        download-file-name: SpamHam_weights/SpamHam/model.safetensors
+        download-to: ./weights/SpamHamModel/
 
-      env:
-        GDRIVE_CREDENTIALS_DATA : ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+    - name: Download weights SpamHam
+      uses: k0staa/download-gdrive-file-action@v1
+      with:
+        service-account-auth-json: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+        download-file-name: SpamHam_weights/Distilbert/model.safetensors
+        download-to: ./weights/DistilBert_4seqSls_base_cased/
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
