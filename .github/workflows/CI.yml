@@ -14,14 +14,14 @@ jobs:
     - name: Download weights SpamHam
       uses: k0staa/download-gdrive-file-action@v1
       with:
-        service-account-auth-json: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+        service-account-auth-json: ${{ secrets.SERVICE_ACCOUNT_KEY_JSON }}
         download-file-name: SpamHam_weights/SpamHam/model.safetensors
         download-to: ./weights/SpamHamModel/
 
     - name: Download weights Distilbert
       uses: k0staa/download-gdrive-file-action@v1
       with:
-        service-account-auth-json: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+        service-account-auth-json: ${{ secrets.SERVICE_ACCOUNT_KEY_JSON }}
         download-file-name: SpamHam_weights/Distilbert/model.safetensors
         download-to: ./weights/DistilBert_4seqSls_base_cased/
 
