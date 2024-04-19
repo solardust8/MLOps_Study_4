@@ -1,4 +1,4 @@
-# MLOps Study / Part 1
+# MLOps Study / Part 2 (Hadoop DFS)
 
 MLOps study repository to practice ML project organization and deployment. 
 This will be dedicated to a simple spam detection service using sequence classification with BERT.
