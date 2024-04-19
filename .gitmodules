@@ -1,0 +1,3 @@
+[submodule "Hadoop"]
+	path = Hadoop
+	url = https://github.com/big-data-europe/docker-hadoop.git
