@@ -4,7 +4,7 @@ import os
 # Authentication
 client = hvac.Client(
     url='http://127.0.0.1:8200',
-    token='sometesttoken',
+    token=os.getenv('HVAC_TOKEN'),
 )
 
 secret1 = os.getenv('SECRET1')
